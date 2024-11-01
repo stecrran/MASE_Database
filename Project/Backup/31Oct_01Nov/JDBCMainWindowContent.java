@@ -16,9 +16,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 	// DB Connectivity Attributes
 	private Connection con = null;
 	private Statement stmt = null;
-	private CallableStatement call_stmt = null;
 	private ResultSet rs = null;
-	private PreparedStatement ps = null;
 
 	private Container content;
 	private JPanel detailsPanel;
@@ -63,17 +61,11 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 	private JButton insertButton = new JButton("Insert");
 	private JButton deleteButton = new JButton("Delete");
 	private JButton clearButton = new JButton("Clear");
-	// Exit
 	private JButton exitButton = new JButton("Exit");
-	// Export buttons
 	private JButton exportButton = new JButton("All Data");
-	private JButton diabeticButton = new JButton("Diabetic Patients");
-	private JButton nonDiabeticButton = new JButton("Non-Diabetic Patients");
-	private JButton recommendBPButton = new JButton("BP >140/90");
-	private JButton glucoseNormalButton = new JButton("Glucose <100");
-	private JButton glucoseHighButton = new JButton("Glucose >200");
-	private JButton lowSpO2Button = new JButton("SpO₂ <96%");
-	private JButton showIfLowSugar = new JButton("Check: Low Sugar");
+	private JButton diabetic = new JButton("Diabetic Patients");
+	private JButton nonDiabetic = new JButton("Non-Diabetic Patients");
+	private JButton recommendBP = new JButton("BP 130/90");
 
 
 	public JDBCMainWindowContent(String aTitle) {
@@ -153,13 +145,9 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 		gbcExp.insets = new Insets(5, 5, 5, 5); // padding
 
 		buttonPosition(gbcExp, exportPanel, 0, 0, exportButton);
-		buttonPosition(gbcExp, exportPanel, 1, 0, diabeticButton);
-		buttonPosition(gbcExp, exportPanel, 2, 0, nonDiabeticButton);
-		buttonPosition(gbcExp, exportPanel, 3, 0, recommendBPButton);
-		buttonPosition(gbcExp, exportPanel, 4, 0, glucoseNormalButton);
-		buttonPosition(gbcExp, exportPanel, 5, 0, glucoseHighButton);
-		buttonPosition(gbcExp, exportPanel, 6, 0, lowSpO2Button);
-		buttonPosition(gbcExp, exportPanel, 7, 0, showIfLowSugar);
+		buttonPosition(gbcExp, exportPanel, 1, 0, diabetic);
+		buttonPosition(gbcExp, exportPanel, 2, 0, nonDiabetic);
+		buttonPosition(gbcExp, exportPanel, 3, 0, recommendBP);
 
 		// Create a panel for the exit button
 		JPanel buttonsPanelExit = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -180,13 +168,9 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 		deleteButton.addActionListener(this);
 		clearButton.addActionListener(this);
 		exitButton.addActionListener(this);
-		diabeticButton.addActionListener(this);
-		nonDiabeticButton.addActionListener(this);
-		recommendBPButton.addActionListener(this);
-		glucoseNormalButton.addActionListener(this);
-		glucoseHighButton.addActionListener(this);
-		lowSpO2Button.addActionListener(this);
-		showIfLowSugar.addActionListener(this);
+		diabetic.addActionListener(this);
+		nonDiabetic.addActionListener(this);
+		recommendBP.addActionListener(this);
 
 		// Table panel for displaying database contents
 		TableofDBContents.setPreferredScrollableViewportSize(new Dimension(700, 300));
@@ -280,77 +264,19 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 				writeResult(rs, cmd);
 		}
 		
-		if (target == nonDiabeticButton) {
-				String cmd = "SELECT medicalrecords.PatientID, patient.age, medicalrecords.BloodGlucose, concat(medicalrecords.Systolic_BloodPressure, '/', "
-						+ "medicalrecords.Diastolic_BloodPressure) as BP_Reading FROM diabetes.medicalrecords inner join diabetes.patient \r\n"
-						+ "on medicalrecords.PatientID = patient.PatientID where Diabetic_NonDiabetic = 'N' order by age DESC;";
+		if (target == nonDiabetic) {
+				String cmd = "SELECT * FROM diabetes.medicalrecords where Diabetic_NonDiabetic = 'N';";
 				writeResult(rs, cmd);
 		}
 		
-		if (target == diabeticButton) {
-				String cmd = "SELECT medicalrecords.PatientID, patient.age, medicalrecords.BloodGlucose, concat(medicalrecords.Systolic_BloodPressure, '/', "
-						+ "medicalrecords.Diastolic_BloodPressure) as BP_Reading FROM diabetes.medicalrecords inner join diabetes.patient \r\n"
-						+ "on medicalrecords.PatientID = patient.PatientID where Diabetic_NonDiabetic = 'D' order by age DESC;";
+		if (target == diabetic) {
+				String cmd = "SELECT * FROM diabetes.medicalrecords where Diabetic_NonDiabetic = 'D';";
 				writeResult(rs, cmd);
 		}
 		
-		if (target == recommendBPButton) {
-				String cmd = "SELECT medicalrecords.PatientID, patient.age, medicalrecords.HeartRate, medicalrecords.SpO2, concat(medicalrecords.Systolic_BloodPressure, '/', "
-						+ "medicalrecords.Diastolic_BloodPressure) as BP_Reading, medicalrecords.Diabetic_NonDiabetic FROM diabetes.medicalrecords inner join diabetes.patient \r\n"
-						+ "on medicalrecords.PatientID = patient.PatientID where Diastolic_BloodPressure > 90 and Systolic_BloodPressure > 140 ORDER BY age ASC;";
+		if (target == recommendBP) {
+				String cmd = "SELECT * FROM diabetes.medicalrecords where Diastolic_BloodPressure < 90 and Systolic_BloodPressure < 130;";
 				writeResult(rs, cmd);
-		}
-		
-		if (target == glucoseNormalButton) {
-			String cmd = "SELECT * FROM diabetes.medicalrecords where BloodGlucose < 100;";
-			writeResult(rs, cmd);
-		}
-		
-		if (target == glucoseHighButton) {
-			String cmd = "SELECT * FROM diabetes.medicalrecords where BloodGlucose > 200;";
-			writeResult(rs, cmd);
-		}
-		
-		if (target == lowSpO2Button) {
-			String cmd = "select medicalrecords.PatientID, patient.age, medicalrecords.SpO2 as Sp02_pc, medicalrecords.HeartRate, "
-					+ "medicalrecords.BodyTemp from medicalrecords inner join diabetes.patient \r\n"
-					+ "on medicalrecords.PatientID = patient.PatientID where SpO2 < 96 order by SpO2 ASC;";
-			writeResult(rs, cmd);
-		}
-		
-		if (target == showIfLowSugar) {
-			JFrame f = new JFrame();
-			// based on numRecForCellButton in JDBC example but using CallableStatement 
-			try {
-				String sql = "{CALL diabetes.lowSugarCheck(?)}";
-				call_stmt = con.prepareCall(sql);
-
-				String patientID = patientIDTF.getText();
-				Integer testPatient = null;
-				if (!patientID.isEmpty()) {
-					testPatient = Integer.parseInt(patientID);
-				}
-
-				if (testPatient != null) {
-					call_stmt.setInt(1, testPatient);
-				} else {
-					call_stmt.setNull(1, Types.INTEGER);
-				}
-				call_stmt.execute();
-				// I only want a single value, so display only. No export required for one value.
-				rs = call_stmt.getResultSet();
-				if (rs != null && rs.next()) {
-					if (isInteger(rs.getString(1))) {
-					JOptionPane.showMessageDialog(f, "Blood sugar for Patient #" + patientID + " is " + rs.getString(1));
-					}
-					else {
-						JOptionPane.showMessageDialog(f, rs.getString(1));
-					}
-				}
-		
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
 		}
 		
 		if (target == exitButton) {
@@ -371,18 +297,5 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 			exception.printStackTrace();
 		}
 	}
-	
-	public boolean isInteger(String output) {
-	    if (output == null || output.isEmpty()) {
-	        return false;
-	    }
-	    try {
-	        Integer.parseInt(output);
-	        return true;
-	    } catch (NumberFormatException e) {
-	        return false;
-	    }
-	}
-
 	
 }

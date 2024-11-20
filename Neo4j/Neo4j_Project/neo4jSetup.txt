@@ -80,6 +80,22 @@ MERGE (a)-[:CONDUCTS]->(t);
 MATCH (a:Account {accountId: 'A002'}), (t:Transaction {transactionId: 'T002'})
 MERGE (a)-[:CONDUCTS]->(t);
 
+// Link Account A001 to Transaction T009
+MATCH (a:Account {accountId: 'A001'}), (t:Transaction {transactionId: 'T009'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+// Link Account A002 to Transaction T010
+MATCH (a:Account {accountId: 'A002'}), (t:Transaction {transactionId: 'T010'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+// Link Device D005 to Transaction T001
+MATCH (d:Device {deviceId: 'D005'}), (t:Transaction {transactionId: 'T001'})
+MERGE (d)-[:PERFORMS]->(t);
+
+// Link Device D006 to Transaction T002
+MATCH (d:Device {deviceId: 'D006'}), (t:Transaction {transactionId: 'T002'})
+MERGE (d)-[:PERFORMS]->(t);
+
 // Device performs transactions
 MATCH (d:Device {deviceId: 'D005'}), (t:Transaction {transactionId: 'T009'})
 MERGE (d)-[:PERFORMS]->(t);

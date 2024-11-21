@@ -6,7 +6,8 @@ CREATE (:Customer {customerId: 'C001', name: 'Jim', email: 'jim@gmail.com', phon
 CREATE (:Customer {customerId: 'C002', name: 'Aine', email: 'aine@gmail.com', phone: '0874443234'}); // Aine spends unusually high amounts of money in Tesco
 CREATE (:Customer {customerId: 'C003', name: 'John', email: 'john@gmail.com', phone: '0874309889'}); // John buys things too quickly and from different locations
 CREATE (:Customer {customerId: 'C004', name: 'Sophia', email: 'sophia@gmail.com', phone: '0854327887'}); // Sophia has too many accounts
-CREATE (:Customer {customerId: 'C005', name: 'Jane', email: 'jane@gmail.com', phone: '0854327887'}); // Jane uses too many different devices
+CREATE (:Customer {customerId: 'C005', name: 'Jane', email: 'jane@gmail.com', phone: '0856139970'}); // Jane uses too many different devices
+CREATE (:Customer {customerId: 'C006', name: 'Paul', email: 'paul@gmail.com', phone: '0855527778'}); 
 
 // Create Accounts
 CREATE (:Account {accountId: 'A001', balance: 5784, accountType: 'Credit'});
@@ -17,6 +18,7 @@ CREATE (:Account {accountId: 'A005', balance: 57, accountType: 'Credit'});
 CREATE (:Account {accountId: 'A006', balance: 10098, accountType: 'Credit'});
 CREATE (:Account {accountId: 'A007', balance: 132, accountType: 'Savings'});
 CREATE (:Account {accountId: 'A008', balance: 143, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A009', balance: 15066, accountType: 'Savings'});
 
 // Create Transactions
 CREATE (:Transaction {transactionId: 'T001', amount: 120, timestamp: '2024-11-15T10:00:00', location: 'Dublin'});
@@ -30,12 +32,15 @@ CREATE (:Transaction {transactionId: 'T008', amount: 9743, timestamp: '2024-11-1
 CREATE (:Transaction {transactionId: 'T009', amount: 95, timestamp: '2024-11-16T19:47:00', location: 'Dublin'});
 CREATE (:Transaction {transactionId: 'T010', amount: 54, timestamp: '2024-11-16T19:50:00', location: 'Dublin'});
 CREATE (:Transaction {transactionId: 'T011', amount: 43, timestamp: '2024-11-16T19:56:00', location: 'Dublin'});
+CREATE (:Transaction {transactionId: 'T012', amount: 75, timestamp: '2024-11-20T20:48:00', location: 'Cork'});
+
 
 // Create Merchants
 CREATE (:Merchant {merchantId: 'M001', name: 'Smyths'});
 CREATE (:Merchant {merchantId: 'M002', name: 'Tesco'});
 CREATE (:Merchant {merchantId: 'M003', name: 'Zara'});
 CREATE (:Merchant {merchantId: 'M004', name: 'Harvey Norman'});
+CREATE (:Merchant {merchantId: 'M005', name: 'Jimmy's Superstore'});
 
 // Create Devices
 CREATE (:Device {deviceId: 'D001', type: 'Mobile', ipAddress: '192.168.1.1'});
@@ -45,7 +50,7 @@ CREATE (:Device {deviceId: 'D004', type: 'Laptop', ipAddress: '203.0.113.50'});
 CREATE (:Device {deviceId: 'D005', type: 'Laptop', ipAddress: '123.134.154.32'});
 CREATE (:Device {deviceId: 'D006', type: 'Laptop', ipAddress: '143.124.198.5'});
 CREATE (:Device {deviceId: 'D007', type: 'Laptop', ipAddress: '200.143.143.9'});
-
+CREATE (:Device {deviceId: 'D008', type: 'Desktop', ipAddress: '192.224.64.33'});
 // Create Relationships
 
 // Customer owns accounts
@@ -73,6 +78,10 @@ MERGE (c)-[:OWNS]->(a);
 MATCH (c:Customer {customerId: 'C005'}), (a:Account {accountId: 'A008'})
 MERGE (c)-[:OWNS]->(a);
 
+MATCH (c:Customer {customerId: 'C006'}), (a:Account {accountId: 'A009'})
+MERGE (c)-[:OWNS]->(a);
+
+
 // Account conducts transactions
 MATCH (a:Account {accountId: 'A001'}), (t:Transaction {transactionId: 'T001'})
 MERGE (a)-[:CONDUCTS]->(t);
@@ -87,6 +96,11 @@ MERGE (a)-[:CONDUCTS]->(t);
 // Link Account A002 to Transaction T010
 MATCH (a:Account {accountId: 'A002'}), (t:Transaction {transactionId: 'T010'})
 MERGE (a)-[:CONDUCTS]->(t);
+
+// new transaction
+MATCH (a:Account {accountId: 'A009'}), (t:Transaction {transactionId: 'T012'})
+MERGE (a)-[:CONDUCTS]->(t);
+
 
 // Link Device D005 to Transaction T001
 MATCH (d:Device {deviceId: 'D005'}), (t:Transaction {transactionId: 'T001'})
@@ -106,6 +120,11 @@ MERGE (d)-[:PERFORMS]->(t);
 MATCH (d:Device {deviceId: 'D007'}), (t:Transaction {transactionId: 'T011'})
 MERGE (d)-[:PERFORMS]->(t);
 
+// new link
+MATCH (d:Device {deviceId: 'D008'}), (t:Transaction {transactionId: 'T012'})
+MERGE (d)-[:PERFORMS]->(t);
+
+
 MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D005'})
 MERGE (c)-[:USES]->(d);
 
@@ -113,4 +132,8 @@ MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D006'})
 MERGE (c)-[:USES]->(d);
 
 MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D007'})
+MERGE (c)-[:USES]->(d);
+
+// new match
+MATCH (c:Customer {customerId: 'C006'}), (d:Device {deviceId: 'D008'})
 MERGE (c)-[:USES]->(d);

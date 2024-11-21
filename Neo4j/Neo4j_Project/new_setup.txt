@@ -1,0 +1,104 @@
+// Script which ensures that there is one link for each property. This needs to be re-written to look fraudulent.
+// Step 1: Clear all existing data
+MATCH (n)
+DETACH DELETE n;
+
+// Step 2: Create Customers
+CREATE (:Customer {customerId: 'C001', name: 'Jim', email: 'jim@gmail.com', phone: '0865443322'});
+CREATE (:Customer {customerId: 'C002', name: 'Aine', email: 'aine@gmail.com', phone: '0874443234'}); 
+CREATE (:Customer {customerId: 'C003', name: 'John', email: 'john@gmail.com', phone: '0874309889'});
+CREATE (:Customer {customerId: 'C004', name: 'Sophia', email: 'sophia@gmail.com', phone: '0854327887'});
+CREATE (:Customer {customerId: 'C005', name: 'Jane', email: 'jane@gmail.com', phone: '0854327887'});
+
+// Step 3: Create Accounts
+CREATE (:Account {accountId: 'A001', balance: 5784, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A002', balance: 2990, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A003', balance: 10632, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A004', balance: 3009, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A005', balance: 57, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A006', balance: 10098, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A007', balance: 132, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A008', balance: 143, accountType: 'Savings'});
+
+// Step 4: Create Transactions
+CREATE (:Transaction {transactionId: 'T001', amount: 120, timestamp: '2024-11-15T10:00:00', location: 'Dublin'});
+CREATE (:Transaction {transactionId: 'T002', amount: 2800, timestamp: '2024-11-15T10:30:00', location: 'Athlone'});
+CREATE (:Transaction {transactionId: 'T003', amount: 13, timestamp: '2024-11-16T12:00:00', location: 'Galway'});
+CREATE (:Transaction {transactionId: 'T004', amount: 80, timestamp: '2024-11-16T15:45:00', location: 'Limerick'});
+CREATE (:Transaction {transactionId: 'T005', amount: 90, timestamp: '2024-11-16T15:46:00', location: 'Waterford'});
+
+// Step 5: Create Merchants
+CREATE (:Merchant {merchantId: 'M001', name: 'Smyths'});
+CREATE (:Merchant {merchantId: 'M002', name: 'Tesco'});
+CREATE (:Merchant {merchantId: 'M003', name: 'Zara'});
+CREATE (:Merchant {merchantId: 'M004', name: 'Harvey Norman'});
+
+// Step 6: Create Devices
+CREATE (:Device {deviceId: 'D001', type: 'Mobile', ipAddress: '192.168.1.1'});
+CREATE (:Device {deviceId: 'D002', type: 'Desktop', ipAddress: '203.0.113.42'});
+CREATE (:Device {deviceId: 'D003', type: 'Tablet', ipAddress: '192.168.2.10'});
+
+// Step 7: Link Customers to Accounts
+MATCH (c:Customer {customerId: 'C001'}), (a:Account {accountId: 'A001'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C002'}), (a:Account {accountId: 'A002'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C003'}), (a:Account {accountId: 'A003'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C004'}), (a:Account {accountId: 'A004'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C005'}), (a:Account {accountId: 'A005'})
+MERGE (c)-[:OWNS]->(a);
+
+// Step 8: Link Accounts to Transactions
+MATCH (a:Account {accountId: 'A001'}), (t:Transaction {transactionId: 'T001'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+MATCH (a:Account {accountId: 'A002'}), (t:Transaction {transactionId: 'T002'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+MATCH (a:Account {accountId: 'A003'}), (t:Transaction {transactionId: 'T003'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+MATCH (a:Account {accountId: 'A004'}), (t:Transaction {transactionId: 'T004'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+MATCH (a:Account {accountId: 'A005'}), (t:Transaction {transactionId: 'T005'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+// Step 9: Link Transactions to Merchants
+MATCH (t:Transaction {transactionId: 'T001'}), (m:Merchant {merchantId: 'M001'})
+MERGE (t)-[:INVOLVES]->(m);
+
+MATCH (t:Transaction {transactionId: 'T002'}), (m:Merchant {merchantId: 'M002'})
+MERGE (t)-[:INVOLVES]->(m);
+
+MATCH (t:Transaction {transactionId: 'T003'}), (m:Merchant {merchantId: 'M003'})
+MERGE (t)-[:INVOLVES]->(m);
+
+MATCH (t:Transaction {transactionId: 'T004'}), (m:Merchant {merchantId: 'M004'})
+MERGE (t)-[:INVOLVES]->(m);
+
+// Step 10: Link Customers to Devices
+MATCH (c:Customer {customerId: 'C001'}), (d:Device {deviceId: 'D001'})
+MERGE (c)-[:USES]->(d);
+
+MATCH (c:Customer {customerId: 'C002'}), (d:Device {deviceId: 'D002'})
+MERGE (c)-[:USES]->(d);
+
+MATCH (c:Customer {customerId: 'C003'}), (d:Device {deviceId: 'D003'})
+MERGE (c)-[:USES]->(d);
+
+// Step 11: Link Devices to Transactions
+MATCH (d:Device {deviceId: 'D001'}), (t:Transaction {transactionId: 'T001'})
+MERGE (d)-[:PERFORMS]->(t);
+
+MATCH (d:Device {deviceId: 'D002'}), (t:Transaction {transactionId: 'T002'})
+MERGE (d)-[:PERFORMS]->(t);
+
+MATCH (d:Device {deviceId: 'D003'}), (t:Transaction {transactionId: 'T003'})
+MERGE (d)-[:PERFORMS]->(t);

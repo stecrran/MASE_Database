@@ -1,0 +1,98 @@
+
+**************************************************
+1. Identify customers with multiple accounts.
+**************************************************
+MATCH (c:Customer)-[:OWNS]->(a:Account)
+WITH c, COUNT(a) AS accountCount
+WHERE accountCount > 1
+RETURN c.name AS Customer, accountCount AS NumberOfAccounts;
+
+**************************************************
+2. Detect transactions that happen within a short period of time at different locations
+**************************************************
+MATCH (t1:Transaction)-[:PERFORMS]-(d:Device),
+      (t2:Transaction)-[:PERFORMS]-(d)
+WHERE t1.transactionId <> t2.transactionId
+  AND ABS(duration.between(datetime(t1.timestamp), datetime(t2.timestamp)).minutes) <= 15
+  AND t1.location <> t2.location
+RETURN d.deviceId AS Device, t1.location AS Location1, t2.location AS Location2, t1.timestamp AS Time1, t2.timestamp AS Time2;
+
+**************************************************
+3. Find accounts with unusually high transaction amounts.
+**************************************************
+MATCH (a:Account)-[:CONDUCTS]->(t:Transaction)
+WHERE t.amount > 2000
+RETURN a.accountId AS Account, t.amount AS TransactionAmount, t.timestamp AS Time, t.location AS Location;
+
+**************************************************
+4. Detect customers with shared contact details                   **possible duplicate identities**.
+**************************************************
+MATCH (c1:Customer), (c2:Customer)
+WHERE c1.customerId <> c2.customerId AND (c1.email = c2.email OR c1.phone = c2.phone)
+RETURN c1.name AS Customer1, c2.name AS Customer2, c1.email AS Email, c1.phone AS Phone;
+
+**************************************************
+5. Identify transactions linked to multiple devices        **potential device compromise.**          ******No Results******
+**************************************************
+MATCH (t:Transaction)<-[:PERFORMS]-(d:Device)
+WITH t, COUNT(d) AS deviceCount
+WHERE deviceCount > 1
+RETURN t.transactionId AS Transaction, deviceCount AS NumberOfDevices;
+
+**************************************************
+6. Detect transactions involving the same IP address but are in differnt locations.
+**************************************************
+MATCH (d:Device)-[:PERFORMS]->(t1:Transaction),                                                         *********No Results*******
+      (d)-[:PERFORMS]->(t2:Transaction)
+WHERE t1.transactionId <> t2.transactionId
+  AND d.ipAddress IS NOT NULL
+  AND t1.location <> t2.location
+RETURN d.ipAddress AS IPAddress, t1.location AS Location1, t2.location AS Location2, t1.timestamp AS Time1, t2.timestamp AS Time2;
+
+**************************************************
+7. Highlight merchants with frequent high-value transactions.
+**************************************************
+MATCH (m:Merchant)<-[:INVOLVES]-(t:Transaction)
+WHERE t.amount > 500
+RETURN m.name AS Merchant, COUNT(t) AS HighValueTransactionCount
+ORDER BY HighValueTransactionCount DESC;
+
+**************************************************
+8. Identify devices performing unusually high transaction counts within a short timeframe
+**************************************************
+MATCH (d:Device)-[:PERFORMS]->(t:Transaction)
+WITH d, COUNT(t) AS transactionCount, MIN(t.timestamp) AS startTime, MAX(t.timestamp) AS endTime
+WHERE duration.between(datetime(startTime), datetime(endTime)).hours <= 1 AND transactionCount > 3
+RETURN d.deviceId AS Device, transactionCount AS NumberOfTransactions, startTime AS StartTime, endTime AS EndTime;      ******No Results****
+
+**************************************************
+9. Identify customers with transactions using multiple devices.
+**************************************************
+MATCH (c:Customer)-[:OWNS]->(:Account)-[:CONDUCTS]->(t:Transaction)<-[:PERFORMS]-(d:Device)
+WITH c, COUNT(DISTINCT d) AS deviceCount
+WHERE deviceCount > 1
+RETURN c.name AS Customer, deviceCount AS NumberOfDevices;
+
+**************************************************
+10. Check for devices performing transactions from suspicious IPs.                                       **To search for IPs used by proxy networks, bot traffic, or blacklisted IPs**
+**************************************************
+MATCH (d:Device)-[:PERFORMS]->(t:Transaction)
+WHERE d.ipAddress STARTS WITH '203.0.113'
+RETURN d.deviceId AS Device, d.ipAddress AS IPAddress, t.transactionId AS Transaction, t.location AS Location, t.timestamp AS Time;
+
+**************************************************
+11. Identify accounts accessed by multiple devices in a short period
+**************************************************
+MATCH (c:Customer)-[:OWNS]->(a:Account)-[:CONDUCTS]->(t:Transaction)<-[:PERFORMS]-(d:Device)
+WITH c, a, COLLECT(DISTINCT d.deviceId) AS devices, MIN(t.timestamp) AS startTime, MAX(t.timestamp) AS endTime
+WHERE SIZE(devices) > 1 AND duration.between(datetime(startTime), datetime(endTime)).hours <= 1
+RETURN c.name AS Customer, a.accountId AS Account, devices AS AccessingDevices, startTime AS StartTime, endTime AS EndTime;           ******No results****
+
+
+**************************************************
+12. Identify potential account sharing or compromise.
+**************************************************                                                                             ***No results**
+MATCH (a:Account)-[:CONDUCTS]->(t:Transaction)<-[:PERFORMS]-(d:Device)
+WITH a, COUNT(DISTINCT d) AS deviceCount
+WHERE deviceCount > 1
+RETURN a.accountId AS Account, deviceCount AS NumberOfDevices;

@@ -1,4 +1,3 @@
-// Script which ensures that there is one link for each property. This needs to be re-written to look fraudulent.
 // Clear all existing data
 MATCH (n)
 DETACH DELETE n;

@@ -1,0 +1,9 @@
+Sophie has multiple accounts, multiple purchases in multiple locations. 
+All of these transactions are linked to 2 devices - Mobile and Laptop - Both have IP address in the same network, purchases are in multiple geographical locations but all within a short timeframe within the same day.
+
+All nodes are linked for all entries in the database.
+All other data is normal apart from Áine spending 2800 EUR in Tesco.
+I can add more data if necessary.
+
+View using 'MATCH (n) RETURN n LIMIT 50' to display all relationships
+

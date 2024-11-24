@@ -1,0 +1,35 @@
+
+who made payments?
+how many credit cards were used?
+how many accounts?
+how many payments on credit card?
+what were payments?
+what were amounts?
+
+Control: what was other customer activity? Did this look normal compared to account under investigation?
+
+match (c:Customer)-[:USES]->(d:Device)
+return c
+
+MATCH (d:Device)-[:PERFORMS]->(n:Transaction)
+RETURN d
+
+MATCH (a:Account)-[:CONDUCTS]->(n:Transaction)
+RETURN a AS Account, n as Transaction
+
+Account.id conducts transaction.amount
+MATCH (a:Account)-[:CONDUCTS]->(n:Transaction)
+RETURN a.accountId AS Account, n.amount as Transaction
+
+Customer.name with Account.id conducts Transaction.amount - only two entries. We may need more
+MATCH (c:Customer)-[:OWNS]->(a:Account)-[:CONDUCTS]->(n:Transaction)
+RETURN c.name as CustomerName, a.accountId AS Account, n.amount as Transaction
+
+Return name, accountID, device type, TransactionID, transaction Location
+MATCH (c:Customer)-[:OWNS]->(a:Account)-[:CONDUCTS]->(t:Transaction)<-[:PERFORMS]-(d:Device)
+RETURN 
+    c.name AS CustomerName, 
+    a.accountId AS AccountID, 
+    d.type AS DeviceType, 
+    t.transactionId AS TransactionID, 
+    t.location AS Location

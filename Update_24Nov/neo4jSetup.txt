@@ -1,0 +1,100 @@
+//MATCH (n)
+//DETACH DELETE n;
+
+// Create Customers
+CREATE (:Customer {customerId: 'C001', name: 'Jim', email: 'jim@gmail.com', phone: '0865443322'});
+CREATE (:Customer {customerId: 'C002', name: 'Aine', email: 'aine@gmail.com', phone: '0874443234'}); // Aine spends unusually high amounts of money in Tesco
+CREATE (:Customer {customerId: 'C003', name: 'John', email: 'john@gmail.com', phone: '0874309889'}); // John buys things too quickly and from different locations
+CREATE (:Customer {customerId: 'C004', name: 'Sophia', email: 'sophia@gmail.com', phone: '0854327887'}); // Sophia has too many accounts
+CREATE (:Customer {customerId: 'C005', name: 'Jane', email: 'jane@gmail.com', phone: '0854327887'}); // Jane uses too many different devices
+
+// Create Accounts
+CREATE (:Account {accountId: 'A001', balance: 5784, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A002', balance: 2990, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A003', balance: 10632, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A004', balance: 3009, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A005', balance: 57, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A006', balance: 10098, accountType: 'Credit'});
+CREATE (:Account {accountId: 'A007', balance: 132, accountType: 'Savings'});
+CREATE (:Account {accountId: 'A008', balance: 143, accountType: 'Savings'});
+
+// Create Transactions
+CREATE (:Transaction {transactionId: 'T001', amount: 120, timestamp: '2024-11-15T10:00:00', location: 'Dublin'});
+CREATE (:Transaction {transactionId: 'T002', amount: 2800, timestamp: '2024-11-15T10:30:00', location: 'Athlone'});
+CREATE (:Transaction {transactionId: 'T003', amount: 13, timestamp: '2024-11-16T12:00:00', location: 'Galway'});
+CREATE (:Transaction {transactionId: 'T004', amount: 80, timestamp: '2024-11-16T15:45:00', location: 'Limerick'});
+CREATE (:Transaction {transactionId: 'T005', amount: 90, timestamp: '2024-11-16T15:46:00', location: 'Waterford'});
+CREATE (:Transaction {transactionId: 'T006', amount: 78, timestamp: '2024-11-16T15:47:00', location: 'Cork'});
+CREATE (:Transaction {transactionId: 'T007', amount: 7431, timestamp: '2024-11-16T17:12:00', location: 'Athlone'});
+CREATE (:Transaction {transactionId: 'T008', amount: 9743, timestamp: '2024-11-16T18:47:00', location: 'Athlone'});
+CREATE (:Transaction {transactionId: 'T009', amount: 95, timestamp: '2024-11-16T19:47:00', location: 'Dublin'});
+CREATE (:Transaction {transactionId: 'T010', amount: 54, timestamp: '2024-11-16T19:50:00', location: 'Dublin'});
+CREATE (:Transaction {transactionId: 'T011', amount: 43, timestamp: '2024-11-16T19:56:00', location: 'Dublin'});
+
+// Create Merchants
+CREATE (:Merchant {merchantId: 'M001', name: 'Smyths'});
+CREATE (:Merchant {merchantId: 'M002', name: 'Tesco'});
+CREATE (:Merchant {merchantId: 'M003', name: 'Zara'});
+CREATE (:Merchant {merchantId: 'M004', name: 'Harvey Norman'});
+
+// Create Devices
+CREATE (:Device {deviceId: 'D001', type: 'Mobile', ipAddress: '192.168.1.1'});
+CREATE (:Device {deviceId: 'D002', type: 'Desktop', ipAddress: '203.0.113.42'});
+CREATE (:Device {deviceId: 'D003', type: 'Tablet', ipAddress: '192.168.2.10'});
+CREATE (:Device {deviceId: 'D004', type: 'Laptop', ipAddress: '203.0.113.50'});
+CREATE (:Device {deviceId: 'D005', type: 'Laptop', ipAddress: '123.134.154.32'});
+CREATE (:Device {deviceId: 'D006', type: 'Laptop', ipAddress: '143.124.198.5'});
+CREATE (:Device {deviceId: 'D007', type: 'Laptop', ipAddress: '200.143.143.9'});
+
+// Create Relationships
+
+// Customer owns accounts
+MATCH (c:Customer {customerId: 'C001'}), (a:Account {accountId: 'A001'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C002'}), (a:Account {accountId: 'A002'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C003'}), (a:Account {accountId: 'A003'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C004'}), (a:Account {accountId: 'A004'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C004'}), (a:Account {accountId: 'A005'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C005'}), (a:Account {accountId: 'A006'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C005'}), (a:Account {accountId: 'A007'})
+MERGE (c)-[:OWNS]->(a);
+
+MATCH (c:Customer {customerId: 'C005'}), (a:Account {accountId: 'A008'})
+MERGE (c)-[:OWNS]->(a);
+
+// Account conducts transactions
+MATCH (a:Account {accountId: 'A001'}), (t:Transaction {transactionId: 'T001'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+MATCH (a:Account {accountId: 'A002'}), (t:Transaction {transactionId: 'T002'})
+MERGE (a)-[:CONDUCTS]->(t);
+
+// Device performs transactions
+MATCH (d:Device {deviceId: 'D005'}), (t:Transaction {transactionId: 'T009'})
+MERGE (d)-[:PERFORMS]->(t);
+
+MATCH (d:Device {deviceId: 'D006'}), (t:Transaction {transactionId: 'T010'})
+MERGE (d)-[:PERFORMS]->(t);
+
+MATCH (d:Device {deviceId: 'D007'}), (t:Transaction {transactionId: 'T011'})
+MERGE (d)-[:PERFORMS]->(t);
+
+MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D005'})
+MERGE (c)-[:USES]->(d);
+
+MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D006'})
+MERGE (c)-[:USES]->(d);
+
+MATCH (c:Customer {customerId: 'C005'}), (d:Device {deviceId: 'D007'})
+MERGE (c)-[:USES]->(d);
